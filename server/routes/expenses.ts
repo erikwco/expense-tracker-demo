@@ -29,6 +29,10 @@ export const expenseRoutes = new Hono()
   .get("/", c => {
     return c.json({ expenses: memDB })
   })
+  .get("/total-spent", c => {
+    const total = memDB.reduce((total, current) => total = current.amount, 0)
+    return c.json({ "totalSpent": total })
+  })
   .post("/", zValidator('json', createExpenseSchema), c => {
     // get validated input
     const item = c.req.valid('json');
