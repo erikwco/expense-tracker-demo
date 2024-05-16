@@ -3,6 +3,8 @@ import { useEffect, useState } from 'react'
 // import viteLogo from '/vite.svg'
 import './App.css'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from './components/ui/card'
+import { api } from '@/lib/api'
+
 
 function App() {
   // Local State
@@ -13,7 +15,9 @@ function App() {
   useEffect(() => {
     const loadTotal = async () => {
       try {
-        const data = await fetch("/api/v1/expenses/total-spent");
+        // NOTE: this is with out the client on hono
+        // const data = await fetch("/api/v1/expenses/total-spent");
+        const data = await api.expenses['total-spent'].$get()
         const json = await data.json();
         const total = json.totalSpent;
         setTotalSpent(total)
