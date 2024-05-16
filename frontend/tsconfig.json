@@ -11,7 +11,11 @@
     "paths": {
       "@/*": [
         "./src/*"
+      ],
+      "@server/*": [
+        "../server/*"
       ]
+
     },
 
     /* Bundler mode */
