@@ -26,13 +26,22 @@ const memDB: Expense[] = [
 // expense tracker routes
 // ------------------------------------------
 export const expenseRoutes = new Hono()
+  // --------------------------------------------
+  // List of all expenses
+  // --------------------------------------------
   .get("/", c => {
     return c.json({ expenses: memDB })
   })
+  // --------------------------------------------
+  // List of all expenses
+  // --------------------------------------------
   .get("/total-spent", c => {
     const total = memDB.reduce((total, current) => total = current.amount, 0)
     return c.json({ "totalSpent": total })
   })
+  // --------------------------------------------
+  // List of all expenses
+  // --------------------------------------------
   .post("/", zValidator('json', createExpenseSchema), c => {
     // get validated input
     const item = c.req.valid('json');
@@ -46,14 +55,22 @@ export const expenseRoutes = new Hono()
     // TODO: handle error
     c.status(201);
     return c.json({ expense })
-  }).get("/:id{[0-9]+}", c => {
+  })
+  // --------------------------------------------
+  // List of all expenses
+  // --------------------------------------------
+  .get("/:id{[0-9]+}", c => {
     const id = Number.parseInt(c.req.param('id'));
     // find expense
     const expense = memDB.find(expense => expense.id === id);
     if (!expense) { return c.notFound() }
     // get resource
     return c.json({ expense })
-  }).delete("/:id{[0-9]+}", c => {
+  })
+  // --------------------------------------------
+  // List of all expenses
+  // --------------------------------------------
+  .delete("/:id{[0-9]+}", c => {
     // get id to delete from route
     const id = Number.parseInt(c.req.param('id'));
     // find expense id
@@ -62,7 +79,11 @@ export const expenseRoutes = new Hono()
     // deleting records
     const deletedExpense = memDB.splice(index, 1)[0];
     return c.json({ expense: deletedExpense });
-  }).put("/:id{[0-9]+}", zValidator('json', createExpenseSchema), c => {
+  })
+  // --------------------------------------------
+  // List of all expenses
+  // --------------------------------------------
+  .put("/:id{[0-9]+}", zValidator('json', createExpenseSchema), c => {
     // get validated info
     const item = c.req.valid('json');
     const id = Number.parseInt(c.req.param('id'));

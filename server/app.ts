@@ -21,8 +21,18 @@ app.use("*", logger())
 //   credentials: true,
 // }))
 
+
 // expenses routes
-app.route("/api/v1/expenses", expenseRoutes)
+// NOTE: this is for a unique and simple route
+//app.route("/api/v1/expenses", expenseRoutes)
+
+// Here we can define different base paths
+// we store in apiRoute to export it and 
+// use it in the client
+const apiRoutes = app
+  .basePath("/api")
+  .basePath("/v1")
+  .route("/expenses", expenseRoutes)
 
 
 // default routes
@@ -32,3 +42,4 @@ app.get('*', serveStatic({ path: './frontend/dist/index.html' }))
 
 // exporting 
 export default app;
+export type ApiRoutes = typeof apiRoutes;
