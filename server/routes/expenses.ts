@@ -4,7 +4,7 @@ import { zValidator } from "@hono/zod-validator";
 
 
 // ------------------------------------------
-// Expense memory fake database
+// Expense memory fake database]
 // ------------------------------------------
 const expenseSchema = z.object({
   id: z.number().int().positive().min(1),
@@ -14,7 +14,7 @@ const expenseSchema = z.object({
 const createExpenseSchema = expenseSchema.omit({ id: true })
 type Expense = z.infer<typeof expenseSchema>
 
-
+// Fake Database 
 const memDB: Expense[] = [
   { id: 1, title: "Food", amount: 200 },
   { id: 2, title: "Entertainment", amount: 50 },
@@ -26,21 +26,25 @@ const memDB: Expense[] = [
 // expense tracker routes
 // ------------------------------------------
 export const expenseRoutes = new Hono()
+
   // --------------------------------------------
   // List of all expenses
   // --------------------------------------------
   .get("/", c => {
     return c.json({ expenses: memDB })
   })
+
   // --------------------------------------------
-  // List of all expenses
+  // Get the total of the expenses
   // --------------------------------------------
-  .get("/total-spent", c => {
+  .get("/total-spent", async c => {
+    // await new Promise((r) => setTimeout(r, 2000))
     const total = memDB.reduce((total, current) => total = current.amount, 0)
     return c.json({ "totalSpent": total })
   })
+
   // --------------------------------------------
-  // List of all expenses
+  // Create a new expense
   // --------------------------------------------
   .post("/", zValidator('json', createExpenseSchema), c => {
     // get validated input
@@ -56,8 +60,9 @@ export const expenseRoutes = new Hono()
     c.status(201);
     return c.json({ expense })
   })
+
   // --------------------------------------------
-  // List of all expenses
+  // Get one expense by id
   // --------------------------------------------
   .get("/:id{[0-9]+}", c => {
     const id = Number.parseInt(c.req.param('id'));
@@ -67,8 +72,9 @@ export const expenseRoutes = new Hono()
     // get resource
     return c.json({ expense })
   })
+
   // --------------------------------------------
-  // List of all expenses
+  // Delete expense by id
   // --------------------------------------------
   .delete("/:id{[0-9]+}", c => {
     // get id to delete from route
@@ -80,8 +86,9 @@ export const expenseRoutes = new Hono()
     const deletedExpense = memDB.splice(index, 1)[0];
     return c.json({ expense: deletedExpense });
   })
+
   // --------------------------------------------
-  // List of all expenses
+  // Update expense by id
   // --------------------------------------------
   .put("/:id{[0-9]+}", zValidator('json', createExpenseSchema), c => {
     // get validated info
@@ -96,4 +103,7 @@ export const expenseRoutes = new Hono()
     memDB.push(expense);
     return c.json({ expense })
   })
+
+
+
 
