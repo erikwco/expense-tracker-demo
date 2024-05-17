@@ -1,9 +1,12 @@
-// import reactLogo from './assets/react.svg'
-// import viteLogo from '/vite.svg'
-import './App.css'
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from './components/ui/card'
+import { createFileRoute } from '@tanstack/react-router'
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
 import { api } from '@/lib/api'
 import { useQuery } from '@tanstack/react-query'
+
+export const Route = createFileRoute('/')({
+  component: Index,
+})
+
 
 // ---------------------------------------------------------
 // getTotalSpent function
@@ -20,7 +23,7 @@ async function getTotalSpent() {
 // ---------------------------------------------------------
 // Render
 // ---------------------------------------------------------
-function App() {
+function Index() {
   // Local State
   // Tanstack version
   const { isPending, error, data } = useQuery({
@@ -67,4 +70,3 @@ function App() {
   )
 }
 
-export default App
