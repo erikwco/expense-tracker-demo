@@ -4,6 +4,7 @@ import type { ApiRoutes } from "@server/app";
 import { hc } from 'hono/client';
 
 // client to connect to our backend
+// using APiRoutes type
 const client = hc<ApiRoutes>('/');
 
 export const api = client.api.v1;
