@@ -36,25 +36,6 @@ function Index() {
     return 'An error ocurred: ' + error.message;
   }
 
-  // Load total spent
-  // NOTE: this is the direct version but we gonna use 
-  // Tanstack query
-  // useEffect(() => {
-  //   const loadTotal = async () => {
-  //     try {
-  //       // NOTE: this is with out the client on hono
-  //       // const data = await fetch("/api/v1/expenses/total-spent");
-  //       const data = await api.expenses['total-spent'].$get()
-  //       const json = await data.json();
-  //       const total = json.totalSpent;
-  //       setTotalSpent(total)
-  //     } catch (err) {
-  //       setTotalSpent(-1)
-  //       console.error(err)
-  //     }
-  //   }
-  //   loadTotal();
-  // }, [])
 
 
   return (
