@@ -18,7 +18,7 @@ FROM base as build
 
 # Install packages needed to build node modules
 RUN apt-get update -qq && \
-    apt-get install --no-install-recommends -y build-essential pkg-config python-is-python3
+    apt-get install --no-install-recommends -y build-essential node-gyp pkg-config python-is-python3
 
 # Install node modules
 COPY --link bun.lockb package.json ./
@@ -26,7 +26,7 @@ RUN bun install --ci
 
 # modified by me
 # Install frontend modules
-COPY --link frontend/bun.lockb frontend/packages.json ./frontend/
+COPY --link frontend/bun.lockb frontend/package.json ./frontend/
 RUN cd frontend && bun install --ci
 
 # Copy application code

@@ -34,6 +34,8 @@ const apiRoutes = app
   .basePath("/v1")
   .route("/expenses", expenseRoutes)
 
+// configure routes for adminpanel  
+
 
 // default routes
 app.get('*', serveStatic({ root: './frontend/dist' }))
