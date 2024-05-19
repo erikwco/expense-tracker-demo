@@ -1,6 +1,7 @@
 import { Hono } from "hono";
 import { z } from 'zod';
 import { zValidator } from "@hono/zod-validator";
+import { getUser } from "../kinde";
 
 
 // ------------------------------------------
@@ -23,6 +24,11 @@ const memDB: Expense[] = [
 
 
 // ------------------------------------------
+// Protect the expenses routes
+// ------------------------------------------
+
+
+// ------------------------------------------
 // expense tracker routes
 // ------------------------------------------
 export const expenseRoutes = new Hono()
@@ -30,14 +36,14 @@ export const expenseRoutes = new Hono()
   // --------------------------------------------
   // List of all expenses
   // --------------------------------------------
-  .get("/", c => {
+  .get("/", getUser, c => {
     return c.json({ expenses: memDB })
   })
 
   // --------------------------------------------
   // Get the total of the expenses
   // --------------------------------------------
-  .get("/total-spent", async c => {
+  .get("/total-spent", getUser, async c => {
     // await new Promise((r) => setTimeout(r, 2000))
     const total = memDB.reduce((total, current) => total = current.amount, 0)
     return c.json({ "totalSpent": total })
@@ -46,7 +52,7 @@ export const expenseRoutes = new Hono()
   // --------------------------------------------
   // Create a new expense
   // --------------------------------------------
-  .post("/", zValidator('json', createExpenseSchema), c => {
+  .post("/", getUser, zValidator('json', createExpenseSchema), c => {
     // get validated input
     const item = c.req.valid('json');
     // generate next id
@@ -64,7 +70,7 @@ export const expenseRoutes = new Hono()
   // --------------------------------------------
   // Get one expense by id
   // --------------------------------------------
-  .get("/:id{[0-9]+}", c => {
+  .get("/:id{[0-9]+}", getUser, c => {
     const id = Number.parseInt(c.req.param('id'));
     // find expense
     const expense = memDB.find(expense => expense.id === id);
@@ -76,7 +82,7 @@ export const expenseRoutes = new Hono()
   // --------------------------------------------
   // Delete expense by id
   // --------------------------------------------
-  .delete("/:id{[0-9]+}", c => {
+  .delete("/:id{[0-9]+}", getUser, c => {
     // get id to delete from route
     const id = Number.parseInt(c.req.param('id'));
     // find expense id
@@ -90,7 +96,7 @@ export const expenseRoutes = new Hono()
   // --------------------------------------------
   // Update expense by id
   // --------------------------------------------
-  .put("/:id{[0-9]+}", zValidator('json', createExpenseSchema), c => {
+  .put("/:id{[0-9]+}", getUser, zValidator('json', createExpenseSchema), c => {
     // get validated info
     const item = c.req.valid('json');
     const id = Number.parseInt(c.req.param('id'));

@@ -2,6 +2,7 @@ import { Hono } from "hono";
 import { logger } from "hono/logger";
 import { expenseRoutes } from "./routes/expenses";
 import { serveStatic } from "hono/bun";
+import { authRoute } from "./routes/auth";
 
 // main Hono app
 const app = new Hono();
@@ -33,6 +34,7 @@ const apiRoutes = app
   .basePath("/api")
   .basePath("/v1")
   .route("/expenses", expenseRoutes)
+  .route("/auth", authRoute)
 
 // configure routes for adminpanel  
 
