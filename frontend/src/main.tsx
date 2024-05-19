@@ -9,8 +9,13 @@ import { QueryClient, QueryClientProvider } from '@tanstack/react-query'
 import { routeTree } from './routeTree.gen.ts'
 import { RouterProvider, createRouter } from '@tanstack/react-router'
 
+// Tanstack query configuration
+const queryClient = new QueryClient();
+
 // Create a new router instance
-const router = createRouter({ routeTree })
+// NOTE: We pass here queryClient to satisfy the interface in the main.tsx 
+// required for createRouteWithContext
+const router = createRouter({ routeTree, context: { queryClient, user: null } })
 
 // Register Router Instance for type safety
 declare module '@tanstack/react-router' {
@@ -19,8 +24,6 @@ declare module '@tanstack/react-router' {
   }
 }
 
-// Tanstack query configuration
-const queryClient = new QueryClient();
 
 
 ReactDOM.createRoot(document.getElementById('root')!).render(

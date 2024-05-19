@@ -5,7 +5,7 @@ import { createFileRoute, useNavigate } from '@tanstack/react-router'
 import { FieldApi, useForm } from '@tanstack/react-form';
 import { api } from '@/lib/api';
 
-export const Route = createFileRoute('/create-expense')({
+export const Route = createFileRoute('/_authenticated/create-expense')({
   component: CreateExpenses
 })
 
