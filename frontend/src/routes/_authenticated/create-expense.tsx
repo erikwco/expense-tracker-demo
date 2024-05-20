@@ -25,7 +25,7 @@ function CreateExpenses() {
   const form = useForm({
     defaultValues: {
       title: '',
-      amount: 0,
+      amount: '0',
     }, onSubmit: async ({ value }) => {
       console.log(value)
       const result = await api.expenses.$post({ json: value });
@@ -72,15 +72,15 @@ function CreateExpenses() {
             name='amount'
             children={(field) => (
               <>
-                <Label htmlFor={field.name}>Title</Label>
+                <Label htmlFor={field.name}>Amount</Label>
                 <Input
-                  type="text"
+                  type="number"
                   id={field.name}
                   name={field.name}
                   placeholder="Amount"
                   value={field.state.value}
                   onBlur={field.handleBlur}
-                  onChange={(e) => field.handleChange(Number(e.target.value))}
+                  onChange={(e) => field.handleChange((e.target.value))}
                 />
                 <FieldInfo field={field} />
               </>
