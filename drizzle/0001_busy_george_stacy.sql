@@ -1,0 +1,1 @@
+ALTER TABLE "expenses" ADD COLUMN "create_at" timestamp DEFAULT now();
