@@ -48,6 +48,7 @@ function Expenses() {
           <TableRow>
             <TableHead className="w-[100px]">Id</TableHead>
             <TableHead >Title</TableHead>
+            <TableHead className="text-center">Date</TableHead>
             <TableHead className="text-right">Amount</TableHead>
           </TableRow>
         </TableHeader>
@@ -58,6 +59,7 @@ function Expenses() {
                 <TableRow key={index}>
                   <TableCell className="font-medium"><Skeleton className="h-4" /></TableCell>
                   <TableCell><Skeleton className="h-4" /></TableCell>
+                  <TableCell className="text-center"><Skeleton className="h-4" /></TableCell>
                   <TableCell className="text-right"><Skeleton className="h-4" /></TableCell>
                 </TableRow>
               ))
@@ -65,6 +67,7 @@ function Expenses() {
                 <TableRow key={expense.id}>
                   <TableCell className="font-medium">{expense.id}</TableCell>
                   <TableCell>{expense.title}</TableCell>
+                  <TableCell className="text-center">{expense.date}</TableCell>
                   <TableCell className="text-right">{expense.amount}</TableCell>
                 </TableRow>
               ))}
