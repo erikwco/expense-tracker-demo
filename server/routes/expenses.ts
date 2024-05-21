@@ -3,27 +3,10 @@ import { z } from 'zod';
 import { zValidator } from "@hono/zod-validator";
 import { getUser } from "../kinde";
 import { db } from "../db";
-import { expenses as expensesTable } from "../db/schema/expenses";
+import { expenses as expensesTable, insertExpenseSchema } from "../db/schema/expenses";
 import { and, desc, eq, sum } from "drizzle-orm";
+import { createExpenseSchema } from "../shared.types";
 
-
-// ------------------------------------------
-// Expense memory fake database]
-// ------------------------------------------
-const expenseSchema = z.object({
-  id: z.number().int().positive().min(1),
-  title: z.string().min(3).max(100),
-  amount: z.string(),
-})
-const createExpenseSchema = expenseSchema.omit({ id: true })
-type Expense = z.infer<typeof expenseSchema>
-
-// Fake Database 
-const memDB: Expense[] = [
-  { id: 1, title: "Food", amount: "200" },
-  { id: 2, title: "Entertainment", amount: "50" },
-  { id: 3, title: "Rent", amount: "1000" },
-];
 
 
 // ------------------------------------------
@@ -72,7 +55,15 @@ export const expenseRoutes = new Hono()
     // get validated input
     const item = c.req.valid('json');
     const user = c.var.user;
-    const expense = await db.insert(expensesTable).values({ ...item, userId: user.id }).returning();
+
+
+    const validatedExpense = insertExpenseSchema.parse({
+      ...item,
+      userId: user.id
+    })
+
+
+    const expense = await db.insert(expensesTable).values(validatedExpense).returning();
     // returning satisfactory
     // TODO: handle error
     c.status(201);
@@ -105,22 +96,22 @@ export const expenseRoutes = new Hono()
     return c.json({ expense });
   })
 
-  // --------------------------------------------
-  // Update expense by id
-  // --------------------------------------------
-  .put("/:id{[0-9]+}", getUser, zValidator('json', createExpenseSchema), c => {
-    // get validated info
-    const item = c.req.valid('json');
-    const id = Number.parseInt(c.req.param('id'));
-    // find index 
-    const index = memDB.findIndex(expense => expense.id === id);
-    if (index === -1) { return c.notFound() }
-    // take the item to modify later
-    memDB.splice(index, 1)[0];
-    const expense = { id, ...item }
-    memDB.push(expense);
-    return c.json({ expense })
-  })
+// --------------------------------------------
+// Update expense by id
+// --------------------------------------------
+// .put("/:id{[0-9]+}", getUser, zValidator('json', createExpenseSchema), c => {
+//   // get validated info
+//   const item = c.req.valid('json');
+//   const id = Number.parseInt(c.req.param('id'));
+//   // find index
+//   const index = memDB.findIndex(expense => expense.id === id);
+//   if (index === -1) { return c.notFound() }
+//   // take the item to modify later
+//   memDB.splice(index, 1)[0];
+//   const expense = { id, ...item }
+//   memDB.push(expense);
+//   return c.json({ expense })
+// })
 
 
 
