@@ -2,6 +2,9 @@ import { Hono } from "hono";
 import { z } from 'zod';
 import { zValidator } from "@hono/zod-validator";
 import { getUser } from "../kinde";
+import { db } from "../db";
+import { expenses as expensesTable } from "../db/schema/expenses";
+import { and, desc, eq, sum } from "drizzle-orm";
 
 
 // ------------------------------------------
@@ -10,16 +13,16 @@ import { getUser } from "../kinde";
 const expenseSchema = z.object({
   id: z.number().int().positive().min(1),
   title: z.string().min(3).max(100),
-  amount: z.number().int().positive()
+  amount: z.string(),
 })
 const createExpenseSchema = expenseSchema.omit({ id: true })
 type Expense = z.infer<typeof expenseSchema>
 
 // Fake Database 
 const memDB: Expense[] = [
-  { id: 1, title: "Food", amount: 200 },
-  { id: 2, title: "Entertainment", amount: 50 },
-  { id: 3, title: "Rent", amount: 1000 },
+  { id: 1, title: "Food", amount: "200" },
+  { id: 2, title: "Entertainment", amount: "50" },
+  { id: 3, title: "Rent", amount: "1000" },
 ];
 
 
@@ -36,31 +39,40 @@ export const expenseRoutes = new Hono()
   // --------------------------------------------
   // List of all expenses
   // --------------------------------------------
-  .get("/", getUser, c => {
-    return c.json({ expenses: memDB })
+  .get("/", getUser, async c => {
+    const user = c.var.user;
+    const expenses = await db
+      .select()
+      .from(expensesTable)
+      .where(eq(expensesTable.userId, user.id))
+      .orderBy(desc(expensesTable.createdAt))
+      .limit(20);
+    return c.json({ expenses: expenses })
   })
 
   // --------------------------------------------
   // Get the total of the expenses
   // --------------------------------------------
   .get("/total-spent", getUser, async c => {
-    // await new Promise((r) => setTimeout(r, 2000))
-    const total = memDB.reduce((total, current) => total = current.amount, 0)
+    const user = c.var.user;
+    const { total } = await db
+      .select({ total: sum(expensesTable.amount) })
+      .from(expensesTable)
+      .where(eq(expensesTable.userId, user.id))
+      .then((res) => res[0]);
+
+
     return c.json({ "totalSpent": total })
   })
 
   // --------------------------------------------
   // Create a new expense
   // --------------------------------------------
-  .post("/", getUser, zValidator('json', createExpenseSchema), c => {
+  .post("/", getUser, zValidator('json', createExpenseSchema), async c => {
     // get validated input
     const item = c.req.valid('json');
-    // generate next id
-    const id = memDB.length + 1;
-    // build a expense item to insert
-    const expense = { id: id, ...item }
-    // inserting expense
-    memDB.push(expense);
+    const user = c.var.user;
+    const expense = await db.insert(expensesTable).values({ ...item, userId: user.id }).returning();
     // returning satisfactory
     // TODO: handle error
     c.status(201);
@@ -70,10 +82,11 @@ export const expenseRoutes = new Hono()
   // --------------------------------------------
   // Get one expense by id
   // --------------------------------------------
-  .get("/:id{[0-9]+}", getUser, c => {
+  .get("/:id{[0-9]+}", getUser, async c => {
+    const user = c.var.user;
     const id = Number.parseInt(c.req.param('id'));
     // find expense
-    const expense = memDB.find(expense => expense.id === id);
+    const expense = await db.select().from(expensesTable).where(and(eq(expensesTable.userId, user.id), eq(expensesTable.id, id))).then((res) => res[0])
     if (!expense) { return c.notFound() }
     // get resource
     return c.json({ expense })
@@ -82,15 +95,14 @@ export const expenseRoutes = new Hono()
   // --------------------------------------------
   // Delete expense by id
   // --------------------------------------------
-  .delete("/:id{[0-9]+}", getUser, c => {
+  .delete("/:id{[0-9]+}", getUser, async c => {
     // get id to delete from route
     const id = Number.parseInt(c.req.param('id'));
+    const user = c.var.user;
     // find expense id
-    const index = memDB.findIndex(expense => expense.id === id);
-    if (index === -1) { return c.notFound() }
-    // deleting records
-    const deletedExpense = memDB.splice(index, 1)[0];
-    return c.json({ expense: deletedExpense });
+    const expense = await db.delete(expensesTable).where(and(eq(expensesTable.userId, user.id), eq(expensesTable.id, id))).returning().then((res) => res[0])
+    if (!expense) { return c.notFound() }
+    return c.json({ expense });
   })
 
   // --------------------------------------------
