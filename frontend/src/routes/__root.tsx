@@ -2,7 +2,8 @@
 import { UserType } from '@kinde-oss/kinde-typescript-sdk';
 import { QueryClient } from '@tanstack/react-query';
 import { createRootRouteWithContext, Link, Outlet } from '@tanstack/react-router'
-import { TanStackRouterDevtools } from '@tanstack/router-devtools'
+// import { TanStackRouterDevtools } from '@tanstack/router-devtools'
+import { Toaster } from 'sonner';
 
 // NOTE: Because we have authenticated routes and we need QueryClient
 // enable to all the routes, including _authenticated.tsx
@@ -49,7 +50,8 @@ function Root() {
       <div className="p-2 max-w-2xl m-auto">
         <Outlet />
       </div>
-      <TanStackRouterDevtools />
+      <Toaster />
+      {/* <TanStackRouterDevtools /> */}
     </>
 
   );

@@ -63,7 +63,10 @@ export const expenseRoutes = new Hono()
     })
 
 
-    const expense = await db.insert(expensesTable).values(validatedExpense).returning();
+    const expense = await db.insert(expensesTable)
+      .values(validatedExpense)
+      .returning()
+      .then(res => res[0]);
     // returning satisfactory
     // TODO: handle error
     c.status(201);
