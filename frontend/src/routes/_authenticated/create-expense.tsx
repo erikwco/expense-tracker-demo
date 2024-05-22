@@ -3,10 +3,12 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { createFileRoute, useNavigate } from '@tanstack/react-router'
 import { FieldApi, useForm } from '@tanstack/react-form';
-import { api } from '@/lib/api';
+import { createExpense, getAllExpensesQueryOptions, loadingCreateExpenseQueryOptions } from '@/lib/api';
 import { zodValidator } from '@tanstack/zod-form-adapter'
 import { createExpenseSchema } from '@server/shared.types';
 import { Calendar } from '@/components/ui/calendar';
+import { useQueryClient } from '@tanstack/react-query';
+import { toast } from 'sonner';
 
 export const Route = createFileRoute('/_authenticated/create-expense')({
   component: CreateExpenses
@@ -24,7 +26,17 @@ function FieldInfo({ field }: { field: FieldApi<any, any, any, any> }) {
 }
 
 function CreateExpenses() {
+  // ---------------------------------------------------------------------
+  // Queryclient to update state on the get all expenses query
+  // ---------------------------------------------------------------------
+  const queryClient = useQueryClient();
+  // ---------------------------------------------------------------------
+  // Used to Navigate programatically
+  // ---------------------------------------------------------------------
   const navigate = useNavigate();
+  // ---------------------------------------------------------------------
+  // Form configuration
+  // ---------------------------------------------------------------------
   const form = useForm({
     validatorAdapter: zodValidator,
     defaultValues: {
@@ -32,12 +44,36 @@ function CreateExpenses() {
       amount: '0',
       date: new Date().toISOString(),
     }, onSubmit: async ({ value }) => {
-      console.log(value)
-      const result = await api.expenses.$post({ json: value });
-      if (!result.ok) {
-        throw new Error('Server error')
-      }
+      // ensure there are already data cached
+      // if there is no expenses loaded those are loaded
+      const existingExpenses = await queryClient.ensureQueryData(getAllExpensesQueryOptions);
+
+      // -----------------------------------------------
+      // handling optimistic ui
+      // -----------------------------------------------
+      // Navigate inmediately
       navigate({ to: '/expenses' });
+
+      // set flag loading state to handle optimistic ui
+      queryClient.setQueryData(loadingCreateExpenseQueryOptions.queryKey, { expense: value });
+
+      // send the data to the backend
+      try {
+        const newExpense = await createExpense({ value });
+        queryClient.setQueryData(getAllExpensesQueryOptions.queryKey, ({
+          ...existingExpenses,
+          expenses: [newExpense.expense, ...existingExpenses.expenses]
+        }))
+        // success  state 
+        toast("Expense Created", { description: `Expense created with id: ${newExpense.expense.id}` })
+      } catch (error) {
+        toast("Expense Error", { description: `Expense cannot be created` })
+      } finally {
+        queryClient.setQueryData(['loading-create-expense'], {});
+      }
+
+
+
     }
   })
 
