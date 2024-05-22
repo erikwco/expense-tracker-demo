@@ -23,6 +23,7 @@ chrome-user-data
 .vscode
 *.swp
 *.swo
+*.pem
 .env.fly.prod
 .env
 
